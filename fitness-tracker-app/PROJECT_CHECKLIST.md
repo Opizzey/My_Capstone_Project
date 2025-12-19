@@ -3,12 +3,12 @@
 ## 1. Project Setup & Foundation
 - [*] Initialize React project with Vite
 - [*] Set up Git & create initial commit
-- [ ] Install Tailwind CSS and configure
-- [ ] Set up React Router DOM
-- [ ] Create base folder structure (`src/components`, `src/pages`, etc.)
-- [ ] Build Navbar component
-- [ ] Build Footer component
-- [ ] Create initial page structure (Home, Log Workout, History, Progress)
+- [*] Install Tailwind CSS and configure
+- [*] Set up React Router DOM
+- [*] Create base folder structure (`src/components`, `src/pages`, etc.)
+- [*] Build Navbar component
+- [*] Build Footer component
+- [*] Create initial page structure (Home, Log Workout, History, Progress)
 
 ---
 
@@ -69,6 +69,3 @@
 - [ ] Use version control (frequent commits, clear messages)
 - [ ] Keep code modular and reusable
 
----
-
-**Tip:** Copy this checklist into Google Docs, Notion, or your preferred tool. Check off each item as you complete it to stay organized and on track!
