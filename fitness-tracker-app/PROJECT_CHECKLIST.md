@@ -13,11 +13,11 @@
 ---
 
 ## 2. Core Features – Part 1
-- [ ] Build WorkoutForm component (inputs: exercise, sets, reps, weight, date)
-- [ ] Create ExerciseSelector component (fetches from WGER API)
-- [ ] Integrate WGER API (fetch exercises, categories)
-- [ ] Display exercise options in WorkoutForm
-- [ ] Implement loading and error states for API calls
+- [*] Build WorkoutForm component (inputs: exercise, sets, reps, weight, date)
+- [*] Create ExerciseSelector component (fetches from WGER API)
+- [*] Integrate WGER API (fetch exercises, categories)
+- [*] Display exercise options in WorkoutForm
+- [*] Implement loading and error states for API calls
 
 ---
 
