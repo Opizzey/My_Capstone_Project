@@ -137,9 +137,36 @@ function WorkoutHistory() {
                 const day = d.toLocaleString('en-US', { weekday: 'long' });
                 const month = d.toLocaleString('en-US', { month: 'short' });
                 return (
-                  <div key={key} className="bg-white rounded-xl shadow p-4 mb-4">
-                    <div className="font-bold text-lg mb-2">{exerciseMap[exercise] || exercise} - {month} {d.getDate()}, {d.getFullYear()} ({day})</div>
-                    {/* Render log details, sets, etc. here as needed */}
+                  <div key={key} className="bg-green-50 border-l-4 border-green-400 rounded-xl shadow p-4 mb-4">
+                    <div className="font-bold text-lg mb-2 text-green-700 flex items-center gap-2">
+                      {exerciseMap[exercise] || exercise}
+                      <span className="text-gray-400 text-base font-normal">
+                        {month} {d.getDate()}, {d.getFullYear()} ({day})
+                      </span>
+                    </div>
+                    <table className="table-auto w-full text-left mt-2">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="pr-4">SET</th>
+                          <th className="pr-4">REPS</th>
+                          <th className="pr-4">WEIGHT (LBS)</th>
+                          <th className="pr-4">NOTES</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {logs.map((log, i) => (
+                          <tr key={i} className="border-b last:border-b-0">
+                            <td className="pr-4">#{i + 1}</td>
+                            <td className="pr-4">{log.reps}</td>
+                            <td className="pr-4">{log.weight}</td>
+                            <td className="pr-4">{log.notes || "-"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <button className="mt-2 text-green-600 font-semibold hover:underline flex items-center gap-1">
+                      View Details <span>→</span>
+                    </button>
                   </div>
                 );
               })
