@@ -1,20 +1,17 @@
-
-import { useEffect, useState } from "react";
-
+﻿import { useEffect, useState } from "react";
 import React from "react";
 
 function WorkoutHistory() {
   const [workouts, setWorkouts] = useState([]);
   const [exerciseMap, setExerciseMap] = useState({});
   const [search, setSearch] = useState("");
-  const [modal, setModal] = useState(null); // {date, exercise, sets}
   const [filter, setFilter] = useState("");
+
   useEffect(() => {
     const saved = localStorage.getItem("workouts");
     if (saved) {
       setWorkouts(JSON.parse(saved));
     }
-    // Fetch exercise names from WGER API
     async function fetchExercises() {
       let allExercises = [];
       let url = "https://wger.de/api/v2/exerciseinfo/?language=2&limit=100&status=2";
@@ -25,7 +22,6 @@ function WorkoutHistory() {
           allExercises = allExercises.concat(data.results);
           url = data.next;
         }
-        // Map id to name
         const map = {};
         allExercises.forEach(ex => {
           let name = "";
@@ -43,139 +39,176 @@ function WorkoutHistory() {
     fetchExercises();
   }, []);
 
-  // Placeholder values for stats
   const weeklyGoal = 4;
   const weeklyGoalTarget = 5;
   const peakPower = 610;
   const totalVolume = 13700;
 
+  const rows = workouts.flatMap(w => {
+    if (Array.isArray(w.exercises) && w.exercises.length) {
+      return w.exercises.map(ex => ({
+        date: w.date,
+        exercise: ex.exercise,
+        sets: ex.sets,
+        reps: ex.reps,
+        weight: ex.weight,
+        notes: ex.notes,
+      }));
+    }
+    return [{
+      date: w.date,
+      exercise: w.exercise,
+      sets: w.sets,
+      reps: w.reps,
+      weight: w.weight,
+      notes: w.notes,
+    }];
+  });
+
+  const uniqueExercises = Array.from(new Set(rows.map(r => r.exercise))).filter(Boolean);
+
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between">
-      <div className="w-full max-w-7xl mx-auto px-4 py-8">
-        {/* Header and stats cards */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-          <div>
-            <h1 className="text-3xl font-extrabold mb-1">Performance Hub</h1>
-            <p className="text-gray-600">Track your volume, power output, and consistency.</p>
-          </div>
-          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto justify-between">
-            {/* Weekly Goal */}
-            <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center min-w-[180px]">
-              <div className="font-bold text-gray-700 mb-1">WEEKLY GOAL</div>
-              <svg width="48" height="48" className="mb-1">
-                <circle cx="24" cy="24" r="20" fill="#f3f4f6" />
-                <circle cx="24" cy="24" r="20" fill="none" stroke="#22c55e" strokeWidth="5" strokeDasharray={`${(weeklyGoal/weeklyGoalTarget)*125},125`} strokeLinecap="round" />
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-between relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-48 h-48 bg-green-500/10 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 bg-green-500/10 rounded-full translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-8 relative z-10">
+        <div className="border-l-4 border-green-500 pl-4 mb-8">
+          <h1 className="text-3xl font-black text-gray-900 mb-1">History</h1>
+        </div>
+
+        <div className="mb-10">
+          <h2 className="text-2xl font-black text-gray-900 mb-1">Performance Hub</h2>
+          <p className="text-gray-700 text-sm mb-6">Track your volume, power output, and consistency.</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center">
+              <div className="font-bold text-gray-700 text-sm uppercase tracking-wide mb-4">Weekly Goal</div>
+              <svg width="64" height="64" className="mb-3">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="#e5e7eb" strokeWidth="5" />
+                <circle 
+                  cx="32" 
+                  cy="32" 
+                  r="28" 
+                  fill="none" 
+                  stroke="#22c55e" 
+                  strokeWidth="5" 
+                  strokeDasharray={`${(weeklyGoal/weeklyGoalTarget)*176},176`} 
+                  strokeLinecap="round"
+                />
               </svg>
-              <div className="text-2xl font-bold">{weeklyGoal}/{weeklyGoalTarget}</div>
-              <div className="text-green-500 text-sm">On Track</div>
+              <div className="text-3xl font-black text-gray-900 mb-1">{weeklyGoal}/{weeklyGoalTarget}</div>
+              <div className="text-green-600 font-semibold text-xs">On Track</div>
             </div>
-            {/* Peak Power */}
-            <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center min-w-[180px]">
-              <div className="font-bold text-gray-700 mb-1 flex items-center gap-1">PEAK POWER <span className="text-yellow-400">⚡</span></div>
-              <div className="text-3xl font-extrabold">{peakPower} <span className="text-lg font-bold text-gray-500">Watts</span></div>
-              <div className="w-full h-2 bg-gray-200 rounded mt-2 mb-1">
-                <div className="h-2 bg-yellow-400 rounded" style={{ width: '80%' }}></div>
+
+            <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col items-center">
+              <div className="font-bold text-gray-700 text-sm uppercase tracking-wide mb-4 flex items-center gap-1">Peak Power ⚡</div>
+              <div className="text-3xl font-black text-gray-900 mb-2">{peakPower} <span className="text-lg font-bold text-gray-500">Watts</span></div>
+              <div className="w-full h-2 bg-gray-200 rounded-full mb-2">
+                <div className="h-2 bg-yellow-400 rounded-full" style={{ width: '80%' }}></div>
               </div>
-              <div className="text-xs text-yellow-500">High Voltage</div>
+              <div className="text-xs font-semibold text-yellow-500">High Voltage</div>
             </div>
-            {/* Total Volume */}
-            <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center min-w-[180px] border-2 border-blue-400">
-              <div className="font-bold text-gray-700 mb-1 flex items-center gap-1">TOTAL VOLUME <span className="text-blue-400">📈</span></div>
-              <div className="text-3xl font-extrabold">{totalVolume.toLocaleString()} <span className="text-lg font-bold text-gray-500">lbs</span></div>
-              <div className="text-xs text-blue-500 mt-1">Last 5 Sessions</div>
+
+            <div className="bg-white border-2 border-green-500 rounded-lg p-6 flex flex-col items-center">
+              <div className="font-bold text-gray-700 text-sm uppercase tracking-wide mb-4 flex items-center gap-1">Total Volume 💪</div>
+              <div className="text-3xl font-black text-gray-900 mb-1">{totalVolume.toLocaleString()} <span className="text-lg font-bold text-gray-500">lbs</span></div>
+              <div className="text-xs font-semibold text-green-600">Last 5 Sessions</div>
             </div>
           </div>
         </div>
-        {/* Search bar and filter button */}
-        <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
+
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
           <input
             type="text"
             placeholder="Search Logs.."
-            className="flex-1 px-4 py-2 rounded shadow border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          {/* Filter dropdown for exercise */}
-          <select
-            className="px-4 py-2 rounded shadow border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-green-400 font-semibold"
-            value={filter}
-            onChange={e => setFilter(e.target.value)}
-          >
-            <option value="">All Exercises</option>
-            {Array.from(new Set(workouts.map(w => w.exercise || (w.exercises && w.exercises[0]?.exercise))))
-              .filter(Boolean)
-              .map((ex, i) => (
-                <option key={i} value={ex}>{exerciseMap[ex] || ex}</option>
-              ))}
-          </select>
+          <button className="px-6 py-3 border-2 border-blue-500 text-blue-500 font-semibold rounded-lg hover:bg-blue-50 transition flex items-center justify-center gap-2">
+            ⊕ Filter Logs
+          </button>
         </div>
-        {/* Grouped workout logs by date/session */}
-        <div className="flex flex-col gap-6">
-          {workouts.length === 0 ? (
+
+        <div className="flex flex-col gap-4">
+          {rows.length === 0 ? (
             <p className="text-gray-400">No workouts logged yet.</p>
           ) : (
-            Object.entries(
-              workouts.reduce((acc, w) => {
-                const key = `${w.date}__${w.exercise || (w.exercises && w.exercises[0]?.exercise)}`;
-                if (!acc[key]) acc[key] = [];
-                acc[key].push(w);
-                return acc;
-              }, {})
-            )
+            Object.entries(rows.reduce((acc, r) => {
+              const key = `${r.date}__${r.exercise}`;
+              if (!acc[key]) acc[key] = [];
+              acc[key].push(r);
+              return acc;
+            }, {}))
               .filter(([key, logs]) => {
                 const [date, exercise] = key.split("__");
                 const exerciseName = exerciseMap[exercise] || exercise || "";
-                return (
+                const matchesSearch = (
                   exerciseName.toLowerCase().includes(search.toLowerCase()) ||
                   date.toLowerCase().includes(search.toLowerCase())
                 );
+                const matchesFilter = !filter || exercise === filter;
+                return matchesSearch && matchesFilter;
               })
               .reverse()
-              .map(([key, logs], idx) => {
+              .map(([key, logs]) => {
                 const [date, exercise] = key.split("__");
                 const d = new Date(date);
-                const day = d.toLocaleString('en-US', { weekday: 'long' });
-                const month = d.toLocaleString('en-US', { month: 'short' });
+                const day = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase();
+                const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                const dayNum = d.getDate();
+
                 return (
-                  <div key={key} className="bg-green-50 border-l-4 border-green-400 rounded-xl shadow p-4 mb-4">
-                    <div className="font-bold text-lg mb-2 text-green-700 flex items-center gap-2">
-                      {exerciseMap[exercise] || exercise}
-                      <span className="text-gray-400 text-base font-normal">
-                        {month} {d.getDate()}, {d.getFullYear()} ({day})
-                      </span>
+                  <div key={key} className="bg-white border-l-4 border-green-500 rounded-lg p-6 hover:shadow-md transition">
+                    <div className="grid grid-cols-[80px_1fr] gap-6 mb-4">
+                      <div className="flex flex-col items-center justify-center bg-gray-50 rounded-lg p-4">
+                        <div className="text-xs font-bold text-gray-500 uppercase">{month}</div>
+                        <div className="text-xl font-black text-gray-900">{dayNum}</div>
+                        <div className="text-xs text-gray-600 uppercase">{day}</div>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-black text-gray-900 mb-4">{exerciseMap[exercise] || (exercise ? `Exercise #${exercise}` : 'Unknown')}</h3>
+                        
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-sm">
+                            <thead>
+                              <tr className="border-b border-gray-200">
+                                <th className="pb-2 font-semibold text-gray-700 uppercase text-xs">Set</th>
+                                <th className="pb-2 font-semibold text-gray-700 uppercase text-xs">Reps</th>
+                                <th className="pb-2 font-semibold text-gray-700 uppercase text-xs">Weight (lbs)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {logs.map((log, i) => (
+                                <tr key={i} className="border-b border-gray-100 last:border-b-0">
+                                  <td className="py-2 text-gray-700">#{i + 1}</td>
+                                  <td className="py-2 text-gray-700">{log.reps || '-'}</td>
+                                  <td className="py-2 text-gray-700">{log.weight || '-'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <button className="mt-4 px-4 py-2 text-green-600 font-semibold text-sm hover:text-green-700 flex items-center gap-1">
+                          View Details →
+                        </button>
+                      </div>
                     </div>
-                    <table className="table-auto w-full text-left mt-2">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="pr-4">SET</th>
-                          <th className="pr-4">REPS</th>
-                          <th className="pr-4">WEIGHT (LBS)</th>
-                          <th className="pr-4">NOTES</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {logs.map((log, i) => (
-                          <tr key={i} className="border-b last:border-b-0">
-                            <td className="pr-4">#{i + 1}</td>
-                            <td className="pr-4">{log.reps}</td>
-                            <td className="pr-4">{log.weight}</td>
-                            <td className="pr-4">{log.notes || "-"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <button className="mt-2 text-green-600 font-semibold hover:underline flex items-center gap-1">
-                      View Details <span>→</span>
-                    </button>
                   </div>
                 );
               })
           )}
         </div>
       </div>
+
+      <footer className="w-full border-t border-gray-200 bg-white text-center py-4 text-gray-600 text-sm relative z-10">
+        © 2025 FitVerse | Built for Progress
+      </footer>
     </div>
   );
 }
 
 export default WorkoutHistory;
-

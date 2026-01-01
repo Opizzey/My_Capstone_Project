@@ -28,16 +28,11 @@ function ExerciseSelector({ onSelect, value }) {
     fetchAllExercises();
   }, []);
 
-  if (loading) return <p>Loading exercises...</p>;
-  if (error) return <p>{error}</p>;
-
-  // Debug: log the first exercise object
-  if (exercises.length > 0) {
-    console.log("Sample exercise object:", exercises[0]);
-  }
+  if (loading) return <p className="text-gray-600 dark:text-gray-400">Loading exercises...</p>;
+  if (error) return <p className="text-red-500 dark:text-red-400">{error}</p>;
 
   return (
-    <select value={value || ""} onChange={e => onSelect && onSelect(e.target.value)}>
+    <select value={value || ""} onChange={e => onSelect && onSelect(e.target.value)} className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 w-full">
       <option value="">Select an exercise</option>
       {exercises.map(ex => {
         let exerciseName = "";

@@ -17,8 +17,8 @@ function WorkoutItem({ workout, onDelete, onEdit }) {
   }
 
   return (
-    <div className="p-4 border rounded-lg bg-white shadow flex flex-col md:flex-row md:items-center md:justify-between gap-4 hover:shadow-lg transition">
-      <div className="flex flex-col gap-1 text-gray-700">
+    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white/70 dark:bg-gray-800/70 glass shadow-md flex flex-col md:flex-row md:items-center md:justify-between gap-4 hover:shadow-lg transition">
+      <div className="flex flex-col gap-1 text-gray-700 dark:text-gray-300 text-sm">
         {workout.exercises && Array.isArray(workout.exercises) ? (
           <>
             <div><span className="font-semibold">Date:</span> {workout.date}</div>

@@ -85,20 +85,20 @@ function WorkoutForm({ onSubmit, initialValues, isEditing }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 max-w-lg mx-auto flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label className="font-semibold mb-1">Date:</label>
+    <form onSubmit={handleSubmit} className="bg-white/70 dark:bg-gray-800/70 glass rounded-2xl shadow-lg p-6 max-w-lg mx-auto flex flex-col gap-4 border border-gray-200 dark:border-gray-700">
+      <div className="flex flex-col gap-2">
+        <label className="font-semibold mb-1 text-gray-800 dark:text-gray-100">Date:</label>
         <input
           type="date"
           name="date"
-          className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
           value={date}
           onChange={handleDateChange}
         />
         {errors.date && <div className="text-red-500 text-sm mt-1">{errors.date}</div>}
       </div>
       <div className="flex flex-col gap-2">
-        <label className="font-semibold mb-1">Exercises:</label>
+        <label className="font-semibold mb-1 text-gray-800 dark:text-gray-100">Exercises:</label>
         {exercises.map((ex, idx) => (
           <div key={idx} className="flex gap-2 items-end mb-2">
             <div>
@@ -134,10 +134,10 @@ function WorkoutForm({ onSubmit, initialValues, isEditing }) {
             <button type="button" className="text-red-500 ml-2" onClick={() => handleRemoveExercise(idx)} disabled={exercises.length === 1}>Remove</button>
           </div>
         ))}
-        <button type="button" className="bg-blue-500 text-white px-3 py-1 rounded mt-2 w-fit" onClick={handleAddExercise}>Add Exercise</button>
+        <button type="button" className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg mt-3 w-fit font-semibold transition" onClick={handleAddExercise}>+ Add Exercise</button>
         {errors.exercises && <div className="text-red-500 text-sm mt-1">{errors.exercises}</div>}
       </div>
-      <button type="submit" className="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg shadow transition">{isEditing ? "Save Workout" : "Add Workout"}</button>
+      <button type="submit" className="mt-6 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg btn-glow transition text-lg">{isEditing ? "Save Workout" : "Add Workout"}</button>
     </form>
   );
 }

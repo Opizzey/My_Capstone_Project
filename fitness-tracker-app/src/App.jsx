@@ -11,31 +11,31 @@ import About from './pages/About';
 import AuthPage from './pages/AuthPage';
 
 function App() {
-  const [dark, setDark] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
 
   useEffect(() => {
+    const html = document.documentElement;
     if (dark) {
-      document.body.classList.add('dark');
+      html.classList.add('dark');
       localStorage.setItem('theme', 'dark');
     } else {
-      document.body.classList.remove('dark');
+      html.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
   }, [dark]);
 
   return (
-    <div className="min-h-screen transition-colors">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
       <BrowserRouter>
         <Navbar />
-        <div className="flex justify-end p-2">
+        <div className="flex justify-end p-4">
           <button
-            className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 border dark:border-gray-600"
+            className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-600 font-semibold hover:shadow-md transition"
             onClick={() => setDark(d => !d)}
             aria-label="Toggle dark mode"
+            title="Toggle dark/light mode"
           >
-            {dark ? '☀️ Light' : '🌙 Dark'}
+            {dark ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </button>
         </div>
         <main>
