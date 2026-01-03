@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ExerciseSelector from "./ExerciseSelector";
 
 // Utility functions for localStorage
 const TEMPLATES_KEY = "workoutTemplates";
@@ -29,9 +30,9 @@ export default function WorkoutTemplates({ onSelectTemplate }) {
     if (!exerciseInput.name) return;
     setNewTemplate(t => ({
       ...t,
-      exercises: [...t.exercises, exerciseInput]
+      exercises: [...t.exercises, { name: exerciseInput.name, sets: exerciseInput.sets, reps: exerciseInput.reps, weight: exerciseInput.weight }]
     }));
-    setExerciseInput({ name: "", sets: "", reps: "", weight: "" });
+    setExerciseInput({ id: "", name: "", sets: "", reps: "", weight: "" });
   }
 
   function handleRemoveExerciseFromTemplate(idx) {
@@ -79,7 +80,13 @@ export default function WorkoutTemplates({ onSelectTemplate }) {
           />
           <div className="flex flex-col gap-3 mt-4">
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-              <input className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Exercise" value={exerciseInput.name} onChange={e => setExerciseInput({ ...exerciseInput, name: e.target.value })} />
+              <div>
+                <ExerciseSelector
+                  value={exerciseInput.id}
+                  onSelectName={name => setExerciseInput({ ...exerciseInput, name })}
+                  onSelect={id => setExerciseInput({ ...exerciseInput, id })}
+                />
+              </div>
               <input className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Sets" value={exerciseInput.sets} onChange={e => setExerciseInput({ ...exerciseInput, sets: e.target.value })} />
               <input className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Reps" value={exerciseInput.reps} onChange={e => setExerciseInput({ ...exerciseInput, reps: e.target.value })} />
               <input className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Weight" value={exerciseInput.weight} onChange={e => setExerciseInput({ ...exerciseInput, weight: e.target.value })} />

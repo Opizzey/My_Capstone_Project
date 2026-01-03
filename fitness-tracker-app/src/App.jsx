@@ -12,6 +12,9 @@ import AuthPage from './pages/AuthPage';
 
 function App() {
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
+  const [user, setUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('user')) || null; } catch { return null; }
+  });
 
   useEffect(() => {
     const html = document.documentElement;
@@ -45,7 +48,7 @@ function App() {
             <Route path="/workout-history" element={<WorkoutHistory />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/about" element={<About />} />
-            <Route path="/auth" element={<AuthPage onAuth={user => alert('Signed in as: ' + user.email)} />} />
+            <Route path="/auth" element={<AuthPage onAuth={u => { try { localStorage.setItem('user', JSON.stringify(u)); } catch {} setUser(u); alert('Signed in as: ' + (u.email || u.displayName)); }} />} />
           </Routes>
         </main>
         <Footer/>

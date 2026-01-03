@@ -1,14 +1,13 @@
 import React from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-// Example props: workouts = [{ date: '2025-12-01', exercise: 'Bench Press', weight: 100, reps: 8 }, ...]
+
 export default function ProgressChart({ workouts, exerciseName }) {
-  // Filter and sort workouts for the selected exercise
   const filtered = workouts
     .filter(w => w.exercise === exerciseName)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  // Prepare chart data: show weight lifted over time
+
   const data = filtered.map(w => ({
     date: w.date,
     weight: w.weight,

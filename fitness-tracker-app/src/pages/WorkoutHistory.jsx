@@ -68,11 +68,9 @@ function WorkoutHistory() {
   const uniqueExercises = Array.from(new Set(rows.map(r => r.exercise))).filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-between relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-48 h-48 bg-green-500/10 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
-      <div className="absolute bottom-0 right-0 w-64 h-64 bg-green-500/10 rounded-full translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-between relative">
 
-      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-8 relative z-10">
+      <div className="container-app py-8 relative z-10">
         <div className="border-l-4 border-green-500 pl-4 mb-8">
           <h1 className="text-3xl font-black text-gray-900 mb-1">History</h1>
         </div>
@@ -169,7 +167,15 @@ function WorkoutHistory() {
                       </div>
 
                       <div>
-                        <h3 className="text-lg font-black text-gray-900 mb-4">{exerciseMap[exercise] || (exercise ? `Exercise #${exercise}` : 'Unknown')}</h3>
+                        <h3 className="text-lg font-black text-gray-900 mb-4">
+                          {(() => {
+                            if (!exercise) return 'Unknown';
+                            const mapped = exerciseMap[exercise];
+                            if (mapped) return mapped;
+                            if (typeof exercise === 'string' && isNaN(Number(exercise))) return exercise;
+                            return 'Unknown';
+                          })()}
+                        </h3>
                         
                         <div className="overflow-x-auto">
                           <table className="w-full text-left text-sm">
@@ -203,10 +209,6 @@ function WorkoutHistory() {
           )}
         </div>
       </div>
-
-      <footer className="w-full border-t border-gray-200 bg-white text-center py-4 text-gray-600 text-sm relative z-10">
-        © 2025 FitVerse | Built for Progress
-      </footer>
     </div>
   );
 }

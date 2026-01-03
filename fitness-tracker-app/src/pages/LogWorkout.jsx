@@ -46,7 +46,7 @@ function LogWorkout() {
         <h1 className="text-2xl font-bold">Log Work Outs</h1>
       </div>
 
-      <div className="flex-1 w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 px-4 md:px-8 pb-8">
+      <div className="flex-1 container-app grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 pb-8">
         <aside className="flex flex-col gap-6">
           <div className="bg-white border border-gray-200 rounded-lg p-4 flex items-center gap-4">
             <img 
@@ -150,10 +150,6 @@ function LogWorkout() {
           </div>
         </main>
       </div>
-
-      <footer className="w-full border-t border-gray-200 bg-green-50 text-center py-4 text-gray-600 text-sm">
-         2025 FitVerse | Built for Progress
-      </footer>
     </div>
   );
 }
