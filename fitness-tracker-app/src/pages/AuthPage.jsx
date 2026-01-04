@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { auth, googleProvider, isFirebaseConfigured, missingFirebaseKeys } from "../firebase";
-import { signInWithPopup, signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import { Card } from '../components/Card';
+import { registerUser, loginUser, signOutUser } from "../lib/localAuth";
 
 export default function AuthPage({ onAuth }) {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "", displayName: "" });
   const [error, setError] = useState("");
 
   function handleChange(e) {
@@ -13,51 +14,21 @@ export default function AuthPage({ onAuth }) {
     setError("");
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.email || !form.password) {
+    const { email, password, displayName } = form;
+    if (!email || !password) {
       setError("Email and password required");
       return;
     }
-
-    if (isLogin) {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || user.email !== form.email || user.password !== form.password) {
-        setError("Invalid credentials");
-        return;
-      }
+    try {
+      const user = isLogin
+        ? await loginUser(email, password)
+        : await registerUser({ email, password, displayName });
       onAuth && onAuth(user);
-    } else {
-      localStorage.setItem("user", JSON.stringify(form));
-      onAuth && onAuth(form);
-    }
-  }
-
-  async function handleGoogleSignIn() {
-    setError("");
-    if (!isFirebaseConfigured || !auth || !googleProvider) {
-      // Demo fallback when Firebase isn't configured
-      const demoUser = { email: "demo.user@local", displayName: "Demo User", uid: "demo-uid" };
-      onAuth && onAuth(demoUser);
-      setError("Using demo sign-in (Firebase not configured). Add keys to enable real Google auth.");
-      return;
-    }
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      onAuth && onAuth({ email: user.email, displayName: user.displayName, uid: user.uid });
+      if (user) navigate('/');
     } catch (err) {
-      const msg = err?.code ? `${err.code}: ${err.message || "Google sign-in failed"}` : (err?.message || "Google sign-in failed");
-      setError(msg);
-    }
-  }
-
-  async function handleGoogleSignOut() {
-    setError("");
-    try {
-      await signOut(auth);
-    } catch (err) {
-      setError("Sign out failed");
+      setError(err?.message || "Something went wrong");
     }
   }
 
@@ -66,6 +37,16 @@ export default function AuthPage({ onAuth }) {
       <Card className="p-8 max-w-sm w-full">
         <h2 className="text-3xl font-black mb-6 text-center">{isLogin ? "Welcome Back" : "Join FitVerse"}</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {!isLogin && (
+            <input
+              type="text"
+              name="displayName"
+              placeholder="Display name (optional)"
+              className="border border-gray-300 bg-white text-gray-900 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+              value={form.displayName}
+              onChange={handleChange}
+            />
+          )}
           <input
             type="email"
             name="email"
@@ -90,26 +71,8 @@ export default function AuthPage({ onAuth }) {
         <div className="mt-4">
           <button
             type="button"
-            onClick={handleGoogleSignIn}
-            className="w-full bg-gray-900 hover:bg-gray-800 text-green-100 font-bold py-3 px-6 rounded-lg shadow-lg transition text-lg"
-            aria-label="Continue with Google"
-          >
-            Continue with Google
-          </button>
-          {!isFirebaseConfigured && (
-            <div className="mt-2 text-xs text-gray-600">
-              <p>Google Auth is disabled until Firebase is configured.</p>
-              {missingFirebaseKeys?.length > 0 && (
-                <p className="mt-1">Missing: {missingFirebaseKeys.join(", ")}</p>
-              )}
-              <p className="mt-1">Add values in <span className="font-semibold">.env.local</span> using <span className="font-semibold">.env.example</span>.</p>
-              <p className="mt-1">Demo mode is active: clicking the button will sign you in with a local demo account.</p>
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={handleGoogleSignOut}
-            className="mt-2 w-full border border-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-50"
+            onClick={() => { try { signOutUser(); onAuth && onAuth(null); } catch {} }}
+            className="w-full border border-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-50"
           >
             Sign out
           </button>

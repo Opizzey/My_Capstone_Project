@@ -15,18 +15,12 @@ The React Compiler is not enabled on this template because of its impact on dev 
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
-## Firebase Google Auth Setup
+## Authentication
 
-- Create a Firebase project and add a Web app.
-- Enable Authentication → Sign-in method → Google.
-- In Project Settings → General → Your apps → Web, copy the config and paste values into [fitness-tracker-app/.env.local](fitness-tracker-app/.env.local):
-	- `apiKey` → `VITE_FIREBASE_API_KEY`
-	- `authDomain` → `VITE_FIREBASE_AUTH_DOMAIN`
-	- `projectId` → `VITE_FIREBASE_PROJECT_ID`
-	- `appId` → `VITE_FIREBASE_APP_ID`
-	- `storageBucket` → `VITE_FIREBASE_STORAGE_BUCKET`
-	- `messagingSenderId` → `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- In Authentication → Settings → Authorized domains, ensure `localhost` is present.
-- Restart the dev server.
+This app includes a simple local email/password authentication for development. Accounts are stored in localStorage and are not suitable for production use.
 
-On the Auth page, if the Google button is disabled, it will list any missing keys to help you complete configuration.
+- Sign Up: create an account with email and password.
+- Login: authenticate using the saved credentials.
+- Sign Out: clears the local session.
+
+For production, integrate a managed identity provider (e.g., Firebase, Auth0) and server-side user persistence.

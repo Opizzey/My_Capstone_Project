@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card } from '../components/Card';
 
@@ -38,15 +38,72 @@ function getStats(workouts) {
 function Statistics() {
   const [stats, setStats] = useState({ bestLift: 0, total: 0, thisWeek: 0 });
   const [weeklyData, setWeeklyData] = useState([]);
+  const [workouts, setWorkouts] = useState([]);
+  const [exerciseMap, setExerciseMap] = useState({});
 
   useEffect(() => {
     const saved = localStorage.getItem("workouts");
     if (saved) {
-      const workouts = JSON.parse(saved);
-      setStats(getStats(workouts));
-      setWeeklyData(getWeeklyData(workouts));
+      const ws = JSON.parse(saved);
+      setWorkouts(ws);
+      setStats(getStats(ws));
+      setWeeklyData(getWeeklyData(ws));
     }
+    // fetch exercise names for numeric IDs
+    async function fetchExercises() {
+      let all = [];
+      let url = "https://wger.de/api/v2/exerciseinfo/?language=2&limit=100&status=2";
+      try {
+        while (url) {
+          const res = await fetch(url);
+          const data = await res.json();
+          all = all.concat(data.results);
+          url = data.next;
+        }
+        const map = {};
+        all.forEach(ex => {
+          let name = "";
+          if (Array.isArray(ex.translations) && ex.translations.length > 0) {
+            const en = ex.translations.find(t => t.language_short_name === "en");
+            name = en ? en.name : ex.translations[0].name;
+          }
+          map[ex.id] = name || `Exercise #${ex.id}`;
+        });
+        setExerciseMap(map);
+      } catch { /* ignore network issues */ }
+    }
+    fetchExercises();
   }, []);
+
+  const bestExercises = useMemo(() => {
+    if (!workouts || workouts.length === 0) return [];
+    const entries = [];
+    workouts.forEach(w => {
+      const list = Array.isArray(w.exercises) && w.exercises.length ? w.exercises : [{ exercise: w.exercise, reps: w.reps, weight: w.weight }];
+      list.forEach(ex => {
+        if (!ex) return;
+        entries.push({ exercise: ex.exercise, reps: Number(ex.reps) || 0, weight: Number(ex.weight) || 0 });
+      });
+    });
+    const map = {};
+    for (const e of entries) {
+      const key = String(e.exercise);
+      const vol = e.reps * e.weight;
+      const item = map[key] || { exercise: key, volume: 0, pr: 0 };
+      item.volume += vol;
+      if (e.weight > item.pr) item.pr = e.weight;
+      map[key] = item;
+    }
+    const list = Object.values(map)
+      .sort((a, b) => b.volume - a.volume)
+      .slice(0, 3)
+      .map(it => ({
+        name: exerciseMap[it.exercise] || (isNaN(Number(it.exercise)) ? it.exercise : `Exercise #${it.exercise}`),
+        volume: Math.round(it.volume),
+        pr: it.pr
+      }));
+    return list;
+  }, [workouts, exerciseMap]);
 
   return (
     <div className="min-h-screen bg-white text-gray-900 py-8 px-4">
@@ -81,6 +138,28 @@ function Statistics() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+
+          <h2 className="text-2xl font-bold mt-10 mb-4">Best Exercises</h2>
+          {bestExercises.length === 0 ? (
+            <div className="text-gray-500">Log workouts to see your top exercises.</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {bestExercises.map((ex, i) => (
+                <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div className="text-sm text-gray-500">#{i + 1}</div>
+                  <div className="text-lg font-black text-gray-900">{ex.name}</div>
+                  <div className="flex items-center justify-between mt-2 text-sm">
+                    <div className="text-gray-600">Volume</div>
+                    <div className="font-semibold text-green-600">{ex.volume.toLocaleString()} lbs</div>
+                  </div>
+                  <div className="flex items-center justify-between mt-1 text-sm">
+                    <div className="text-gray-600">PR</div>
+                    <div className="font-semibold text-gray-900">{ex.pr} lbs</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
     </div>

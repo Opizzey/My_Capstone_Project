@@ -1,5 +1,6 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import React from "react";
+import Modal from "../components/Modal";
 
 function WorkoutHistory() {
   const [workouts, setWorkouts] = useState([]);
@@ -67,6 +68,13 @@ function WorkoutHistory() {
 
   const uniqueExercises = Array.from(new Set(rows.map(r => r.exercise))).filter(Boolean);
 
+  const [openKey, setOpenKey] = useState(null);
+  const openLogs = useMemo(() => {
+    if (!openKey) return [];
+    const [d, ex] = openKey.split("__");
+    return rows.filter(r => r.date === d && String(r.exercise) === String(ex));
+  }, [openKey, rows]);
+
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col justify-between relative">
 
@@ -116,7 +124,7 @@ function WorkoutHistory() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-6 md:mb-8">
           <input
             type="text"
             placeholder="Search Logs.."
@@ -129,7 +137,7 @@ function WorkoutHistory() {
           </button>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 md:gap-4">
           {rows.length === 0 ? (
             <p className="text-gray-400">No workouts logged yet.</p>
           ) : (
@@ -198,7 +206,7 @@ function WorkoutHistory() {
                           </table>
                         </div>
 
-                        <button className="mt-4 px-4 py-2 text-green-600 font-semibold text-sm hover:text-green-700 flex items-center gap-1">
+                        <button onClick={() => setOpenKey(key)} className="mt-4 px-4 py-2 text-green-600 font-semibold text-sm hover:text-green-700 flex items-center gap-1">
                           View Details →
                         </button>
                       </div>
@@ -209,6 +217,46 @@ function WorkoutHistory() {
           )}
         </div>
       </div>
+      <Modal
+        open={!!openKey}
+        onClose={() => setOpenKey(null)}
+        title={(() => {
+          if (!openKey) return '';
+          const [date, exercise] = openKey.split("__");
+          const name = exerciseMap[exercise] || (isNaN(Number(exercise)) ? exercise : `Exercise #${exercise}`);
+          return `${name} · ${date}`;
+        })()}
+      >
+        {openLogs.length === 0 ? (
+          <div className="text-gray-500">No details found.</div>
+        ) : (
+          <div className="space-y-3">
+            <div className="text-sm text-gray-600">Total sets: <span className="font-semibold text-gray-900">{openLogs.length}</span></div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="py-2 font-semibold text-gray-700 uppercase text-xs">Set</th>
+                    <th className="py-2 font-semibold text-gray-700 uppercase text-xs">Reps</th>
+                    <th className="py-2 font-semibold text-gray-700 uppercase text-xs">Weight</th>
+                    <th className="py-2 font-semibold text-gray-700 uppercase text-xs">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {openLogs.map((log, i) => (
+                    <tr key={i} className="border-b border-gray-100 last:border-b-0">
+                      <td className="py-2">#{i + 1}</td>
+                      <td className="py-2">{log.reps || '-'}</td>
+                      <td className="py-2">{log.weight || '-'}</td>
+                      <td className="py-2 text-gray-600">{log.notes || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
